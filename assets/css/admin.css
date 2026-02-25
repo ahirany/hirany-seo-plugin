@@ -1,0 +1,38 @@
+/* Basic layout for Hirany SEO admin pages */
+.hsp-wrap .hsp-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	grid-gap: 20px;
+	margin-top: 20px;
+}
+
+.hsp-wrap .hsp-card {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	border-radius: 4px;
+	padding: 16px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.hsp-score-badge {
+	display: inline-block;
+	min-width: 42px;
+	text-align: center;
+	padding: 4px 8px;
+	border-radius: 999px;
+	color: #fff;
+	font-weight: 600;
+}
+
+.hsp-score-badge--good {
+	background: #46b450;
+}
+
+.hsp-score-badge--ok {
+	background: #ffb900;
+}
+
+.hsp-score-badge--bad {
+	background: #dc3232;
+}
+

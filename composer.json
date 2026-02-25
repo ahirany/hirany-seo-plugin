@@ -1,0 +1,15 @@
+{
+  "name": "hirany/hirany-seo-plugin",
+  "description": "All-in-one WordPress SEO plugin: keyword tracking, schema, Content AI, SEO scoring, sitemaps, robots/llms.txt, and AI traffic analytics.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "HiranySEO\\": "includes/"
+    }
+  }
+}
+
