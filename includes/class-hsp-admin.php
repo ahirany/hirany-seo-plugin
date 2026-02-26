@@ -138,7 +138,8 @@ class HSP_Admin {
 		if ( isset( $_POST['hsp_settings_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['hsp_settings_nonce'] ) ), 'hsp_save_settings' ) ) {
 			$content_ai_provider = isset( $_POST['hsp_content_ai_provider'] ) ? sanitize_text_field( wp_unslash( $_POST['hsp_content_ai_provider'] ) ) : 'none';
 			$content_ai_api_key  = isset( $_POST['hsp_content_ai_api_key'] ) ? sanitize_text_field( wp_unslash( $_POST['hsp_content_ai_api_key'] ) ) : '';
-			$content_ai_model    = isset( $_POST['hsp_content_ai_model'] ) ? sanitize_text_field( wp_unslash( $_POST['hsp_content_ai_model'] ) ) : '';
+			$content_ai_model   = isset( $_POST['hsp_content_ai_model'] ) ? sanitize_text_field( wp_unslash( $_POST['hsp_content_ai_model'] ) ) : '';
+			$content_ai_api_url  = isset( $_POST['hsp_content_ai_api_url'] ) ? esc_url_raw( wp_unslash( $_POST['hsp_content_ai_api_url'] ) ) : '';
 
 			update_option(
 				'hsp_content_ai_settings',
@@ -146,6 +147,7 @@ class HSP_Admin {
 					'provider' => $content_ai_provider,
 					'api_key'  => $content_ai_api_key,
 					'model'    => $content_ai_model,
+					'api_url'  => $content_ai_api_url,
 				)
 			);
 
@@ -158,6 +160,7 @@ class HSP_Admin {
 				'provider' => 'none',
 				'api_key'  => '',
 				'model'    => '',
+				'api_url'  => '',
 			)
 		);
 		?>
@@ -185,6 +188,17 @@ class HSP_Admin {
 						</th>
 						<td>
 							<input type="text" class="regular-text" id="hsp_content_ai_model" name="hsp_content_ai_model" value="<?php echo esc_attr( $ai_settings['model'] ); ?>" placeholder="gpt-4.1, gpt-4o, etc." />
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							<label for="hsp_content_ai_api_url"><?php esc_html_e( 'API URL (optional)', 'hirany-seo' ); ?></label>
+						</th>
+						<td>
+							<input type="url" class="large-text" id="hsp_content_ai_api_url" name="hsp_content_ai_api_url" value="<?php echo esc_attr( isset( $ai_settings['api_url'] ) ? $ai_settings['api_url'] : '' ); ?>" placeholder="https://api.openai.com/v1/chat/completions" />
+							<p class="description">
+								<?php esc_html_e( 'Leave blank to use OpenAI (https://api.openai.com/v1/chat/completions). For "Custom endpoint", enter your gateway URL (e.g. Azure, OpenAI-compatible proxy).', 'hirany-seo' ); ?>
+							</p>
 						</td>
 					</tr>
 					<tr>

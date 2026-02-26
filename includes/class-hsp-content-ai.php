@@ -183,6 +183,7 @@ class HSP_Content_AI {
 				'provider' => 'none',
 				'api_key'  => '',
 				'model'    => '',
+				'api_url'  => '',
 			)
 		);
 
@@ -222,6 +223,15 @@ class HSP_Content_AI {
 		);
 
 		$api_url = 'https://api.openai.com/v1/chat/completions';
+		if ( ! empty( $settings['api_url'] ) ) {
+			$api_url = rtrim( $settings['api_url'], '/' );
+		}
+		if ( 'custom' === $settings['provider'] && empty( $api_url ) ) {
+			return new WP_Error(
+				'hsp_content_ai_no_url',
+				__( 'Content AI is set to "Custom endpoint" but no API URL was provided. Add it under Hirany SEO → Settings.', 'hirany-seo' )
+			);
+		}
 
 		/**
 		 * Filter the request arguments before the Content AI LLM call.
@@ -254,13 +264,17 @@ class HSP_Content_AI {
 		}
 
 		$code = wp_remote_retrieve_response_code( $response );
-		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		$body = wp_remote_retrieve_body( $response );
+		$data = json_decode( $body, true );
 
-		if ( $code < 200 || $code >= 300 || ! is_array( $data ) ) {
-			return new WP_Error(
-				'hsp_content_ai_bad_response',
-				__( 'The Content AI provider returned an unexpected response. Please check your API credentials.', 'hirany-seo' )
-			);
+		if ( $code < 200 || $code >= 300 ) {
+			$message = $this->build_api_error_message( $code, $body, $data );
+			return new WP_Error( 'hsp_content_ai_bad_response', $message );
+		}
+
+		if ( ! is_array( $data ) ) {
+			$message = $this->build_api_error_message( $code, $body, null );
+			return new WP_Error( 'hsp_content_ai_bad_response', $message );
 		}
 
 		if ( isset( $data['error']['message'] ) ) {
@@ -275,6 +289,46 @@ class HSP_Content_AI {
 		}
 
 		return trim( wp_kses_post( $data['choices'][0]['message']['content'] ) );
+	}
+
+	/**
+	 * Build a user-friendly error message from API response.
+	 *
+	 * @param int         $code HTTP status code.
+	 * @param string      $body Raw response body.
+	 * @param array|null  $data Parsed JSON (if any).
+	 * @return string
+	 */
+	protected function build_api_error_message( $code, $body, $data ) {
+		$msg = sprintf(
+			/* translators: 1: HTTP status code. */
+			__( 'Content AI returned HTTP %1$d.', 'hirany-seo' ),
+			$code
+		);
+
+		if ( is_array( $data ) && ! empty( $data['error']['message'] ) ) {
+			$msg .= ' ' . trim( wp_strip_all_tags( (string) $data['error']['message'] ) );
+			return $msg;
+		}
+
+		if ( is_array( $data ) && ! empty( $data['message'] ) ) {
+			$msg .= ' ' . trim( wp_strip_all_tags( (string) $data['message'] ) );
+			return $msg;
+		}
+
+		$body_trim = trim( wp_strip_all_tags( $body ) );
+		if ( $body_trim !== '' ) {
+			$snippet = wp_html_excerpt( $body_trim, 120 );
+			$msg   .= ' ' . sprintf(
+				/* translators: %s: short snippet of response. */
+				__( 'Response: %s', 'hirany-seo' ),
+				$snippet
+			);
+		} else {
+			$msg .= ' ' . __( 'Please check your API key and that the endpoint URL is correct (Hirany SEO → Settings).', 'hirany-seo' );
+		}
+
+		return $msg;
 	}
 }
 
